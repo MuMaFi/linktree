@@ -52,7 +52,7 @@
       --siren-b: rgba(40,120,255,0.24);
       --grain: 0.09;
       --scan: rgba(0,0,0,0.035);
-      --vignette: rgba(60,20,10,0.10);
+      --vignette: transparent;
       --glitch-blend: multiply;
       --line: rgba(0,0,0,0.07);
     }
@@ -73,9 +73,9 @@
       --blob-c: rgba(0,160,255,0.24);
       --siren-r: rgba(255,30,20,0.34);
       --siren-b: rgba(30,110,255,0.48);
-      --grain: 0.13;
+      --grain: 0.06;
       --scan: rgba(0,0,0,0.28);
-      --vignette: rgba(0,0,0,0.72);
+      --vignette: rgba(0,0,0,0.6);
       --glitch-blend: screen;
       --line: rgba(255,255,255,0.07);
     }
@@ -118,31 +118,17 @@
     }
     .siren.s-red  { left: -26vmax;  background: radial-gradient(circle, var(--siren-r), transparent 62%); }
     .siren.s-blue { right: -26vmax; background: radial-gradient(circle, var(--siren-b), transparent 62%); animation-delay: -1.6s; }
-    /* VHS tracking band rolling down the screen */
-    .vhs {
-      position: absolute; left: 0; right: 0; top: 0; height: 14vh;
-      background: linear-gradient(180deg, transparent, rgba(150,200,255,0.05) 38%, rgba(255,255,255,0.08) 50%, rgba(150,200,255,0.05) 62%, transparent);
-      mix-blend-mode: screen;
-      animation: vhs 9s linear infinite;
-      will-change: transform;
-    }
-    :root:not(.dark) .vhs { mix-blend-mode: normal; background: linear-gradient(180deg, transparent, rgba(40,90,220,0.04) 45%, rgba(40,90,220,0.06) 50%, rgba(40,90,220,0.04) 55%, transparent); }
 
     .vignette {
       position: absolute; inset: 0;
       background: radial-gradient(ellipse at 50% 42%, transparent 40%, var(--vignette) 100%);
     }
-    .scanlines {
-      position: absolute; inset: 0;
-      background: repeating-linear-gradient(to bottom, transparent 0 2px, var(--scan) 2px 3px);
-    }
     .grain {
       position: absolute; inset: -60%;
       opacity: var(--grain);
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      animation: grainShift 0.9s steps(6) infinite;
-      will-change: transform;
     }
+    :root:not(.dark) .grain { display: none; }
 
 
     /* ── TOP BAR ── */
@@ -216,7 +202,6 @@
       width: min(92vw, 520px);
       display: flex; flex-direction: column; align-items: center;
       padding: calc(100px + env(safe-area-inset-top)) 0 calc(56px + env(safe-area-inset-bottom));
-      animation: impact 0.35s linear 0.9s 1 backwards;
     }
 
     .eyebrow {
@@ -250,11 +235,10 @@
         calc(-1px + var(--ax) * -3px) calc(var(--ay) * -2px) rgba(255,0,40,0.35),
         calc(1px + var(--ax) * 3px) calc(var(--ay) * 2px) rgba(0,170,220,0.30),
         0 0 28px rgba(192,32,10,0.22);
-      translate: calc(var(--ax) * 6px) calc(var(--ay) * 4px);
+      translate: calc(var(--ax) * 6px) calc(var(--ay) * 4px + var(--sy, 0) * 0.22px);
+      opacity: calc(1 - var(--sy, 0) / 900);
       transition: translate 0.3s ease-out, text-shadow 0.3s ease-out;
-      animation:
-        slam 1.0s cubic-bezier(0.22,1,0.36,1) 0.35s backwards,
-        jitter 5.5s steps(1) 2.5s infinite;
+      animation: jitter 5.5s steps(1) 2.8s infinite;
       cursor: default;
     }
     :root.dark .album-title-big {
@@ -263,6 +247,12 @@
         calc(1.5px + var(--ax) * 4px) calc(var(--ay) * 2px) rgba(0,200,255,0.35),
         0 0 36px rgba(210,30,10,0.45), 0 0 90px rgba(47,123,255,0.28);
     }
+    /* light mode stays clean: crisp type, no RGB split or glitch */
+    :root:not(.dark) .album-title-big { text-shadow: 0 2px 22px rgba(192,32,10,0.14); animation: none; }
+    :root:not(.dark) .album-title-big::before,
+    :root:not(.dark) .album-title-big::after { display: none; }
+    :root:not(.dark) .link-btn:hover .link-title,
+    :root:not(.dark) .track:hover .t-name { animation: none; }
     .album-title-big::before,
     .album-title-big::after {
       content: attr(data-text);
@@ -309,7 +299,7 @@
       overflow: hidden; pointer-events: none;
     }
     .tape {
-      position: absolute; top: 50%; left: -10vw; width: 120vw;
+      position: absolute; top: 50%; left: -30vw; width: 160vw;
       padding: clamp(8px, 1.4vw, 11px) 0;
       overflow: hidden;
       box-shadow: 0 12px 30px -12px rgba(0,0,0,0.55);
@@ -508,20 +498,6 @@
       55%  { filter: blur(1px); }
       100% { opacity: 1; transform: translateY(0) scaleY(1); filter: blur(0); }
     }
-    @keyframes slam {
-      0%   { opacity: 0; transform: scale(1.6); filter: blur(14px); }
-      50%  { opacity: 1; transform: scale(0.96); filter: blur(0); }
-      70%  { transform: scale(1.02); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes impact {
-      0%   { transform: translate(0, 0); }
-      20%  { transform: translate(-4px, 2px); }
-      40%  { transform: translate(3px, -2px); }
-      60%  { transform: translate(-2px, 1px); }
-      80%  { transform: translate(1px, 0); }
-      100% { transform: translate(0, 0); }
-    }
     @keyframes jitter {
       0%, 87%, 100% { transform: none; }
       88% { transform: skewX(10deg) translateX(-4px); }
@@ -564,14 +540,6 @@
       50%  { transform: translate3d(6vmax, 5vmax, 0) scale(1.08); }
       100% { transform: translate3d(-5vmax, 9vmax, 0) scale(0.94); }
     }
-    @keyframes grainShift {
-      0%   { transform: translate(0, 0); }
-      20%  { transform: translate(-7%, 4%); }
-      40%  { transform: translate(5%, -6%); }
-      60%  { transform: translate(-3%, 8%); }
-      80%  { transform: translate(8%, 2%); }
-      100% { transform: translate(-5%, -4%); }
-    }
     @keyframes marquee { to { transform: translateX(-50%); } }
     @keyframes tapeInFront {
       from { opacity: 0; transform: translateY(-50%) rotate(-3deg) translateX(-40%); }
@@ -581,6 +549,94 @@
       from { opacity: 0; transform: translateY(-50%) rotate(2.4deg) translateX(40%); }
       to   { opacity: 1; transform: translateY(-50%) rotate(2.4deg); }
     }
+
+    /* ══════════ MOTION ══════════ */
+    /* title letters fall into place one by one, wave on hover */
+    .word { display: inline-block; white-space: nowrap; }
+    .ch { display: inline-block; }
+    .album-title-big .ch { animation: chIn 0.9s cubic-bezier(0.22,1,0.36,1) calc(0.3s + var(--i) * 0.035s) backwards; }
+    .album-title-big.ready .ch { animation: none; }
+    .album-title-big.ready:hover .ch { animation: chWave 0.7s cubic-bezier(0.22,1,0.36,1) calc(var(--i) * 0.025s); }
+    @keyframes chIn {
+      from { opacity: 0; transform: translateY(-0.7em) rotate(-14deg) scale(1.3); filter: blur(8px); }
+      to   { opacity: 1; transform: none; filter: blur(0); }
+    }
+    @keyframes chWave { 40% { transform: translateY(-0.14em) scale(1.06); } }
+
+    /* big words rise letter by letter when they scroll in */
+    html.js .rise .ch { opacity: 0; }
+    .rise.in .ch { animation: chUp 0.8s cubic-bezier(0.34,1.56,0.64,1) calc(var(--d, 0s) + var(--i) * 0.06s) both; }
+    @keyframes chUp { from { opacity: 0; transform: translateY(60%) scale(0.6); } to { opacity: 1; transform: none; } }
+    .mega .ch {
+      background: linear-gradient(180deg, var(--text) 0%, transparent 92%);
+      -webkit-background-clip: text; background-clip: text;
+    }
+
+    /* section lines grow out from the heading */
+    .subtitle::before { transform-origin: right; }
+    .subtitle::after  { transform-origin: left; }
+    .subtitle:not(.reveal)::before, .subtitle:not(.reveal)::after { animation: lineGrow 1.1s cubic-bezier(0.22,1,0.36,1) 1.05s backwards; }
+    html.js .subtitle.reveal::before, html.js .subtitle.reveal::after {
+      transform: scaleX(0); transition: transform 1.1s cubic-bezier(0.22,1,0.36,1) 0.15s;
+    }
+    html.js .subtitle.reveal.in::before, html.js .subtitle.reveal.in::after { transform: scaleX(1); }
+
+    /* link icons pop in after their card */
+    .link-icon { animation: iconPop 0.7s cubic-bezier(0.34,1.56,0.64,1) calc(var(--link-delay) + 0.25s) backwards; }
+    @keyframes iconPop { from { opacity: 0; transform: scale(0.3) rotate(-70deg); } }
+    /* 3D tilt towards the pointer */
+    .link-btn:hover { transform: perspective(900px) rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg)) translateY(-4px) scale(1.012); }
+
+    /* tap ripple */
+    .ripple {
+      position: absolute; z-index: -1; border-radius: 50%; pointer-events: none;
+      background: var(--ripple, rgba(255,255,255,0.35));
+      transform: scale(0);
+      animation: ripple 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    .link-btn .ripple { --ripple: rgba(var(--brand), 0.32); }
+    .t-mv { overflow: hidden; isolation: isolate; }
+    @keyframes ripple { to { transform: scale(1); opacity: 0; } }
+
+    /* soft light that trails the cursor */
+    .cursor-glow {
+      position: absolute; left: 0; top: 0; width: 560px; height: 560px; margin: -280px 0 0 -280px;
+      border-radius: 50%; opacity: 0;
+      background: radial-gradient(circle, rgba(47,123,255,0.16), transparent 62%);
+      transition: opacity 0.6s ease;
+      will-change: transform;
+    }
+    :root:not(.dark) .cursor-glow { background: radial-gradient(circle, rgba(47,123,255,0.09), transparent 62%); }
+    .cursor-glow.on { opacity: 1; }
+
+    /* tapes drift sideways while scrolling */
+    .tape-front { translate: calc(var(--sy, 0) * -0.22px) 0; }
+    .tape-back  { translate: calc(var(--sy, 0) * 0.22px) 0; }
+
+    /* music videos: staggered cards, cinematic wipe on the featured one */
+    html.js .mv-rail-wrap .mv-card { opacity: 0; }
+    .mv-rail-wrap.in .mv-card { animation: cardIn 0.8s cubic-bezier(0.22,1,0.36,1) calc(0.1s + var(--i) * 0.12s) both; }
+    @keyframes cardIn { from { opacity: 0; transform: translateX(40px) scale(0.94); } to { opacity: 1; transform: none; } }
+    html.js .mv-feature.reveal img { clip-path: inset(100% 0 0 0); transform: scale(1.18); }
+    html.js .mv-feature.reveal.in img {
+      clip-path: inset(0 0 0 0); transform: scale(1);
+      transition: clip-path 1.1s cubic-bezier(0.77,0,0.18,1) 0.1s, transform 1.4s cubic-bezier(0.22,1,0.36,1) 0.1s, filter 0.5s ease;
+    }
+    html.js .mv-feature.reveal.in:hover img { transform: scale(1.06); transition: transform 0.9s cubic-bezier(0.22,1,0.36,1), filter 0.5s ease; }
+
+    /* tracklist: equalizer replaces the number on hover */
+    .t-num { position: relative; }
+    .t-eq { position: absolute; left: 0.1em; bottom: 0.12em; height: 0.8em; display: flex; align-items: flex-end; gap: 2px; opacity: 0; transition: opacity 0.2s ease; }
+    .t-eq i { width: 3px; height: 100%; border-radius: 1px; background: var(--cyan); box-shadow: 0 0 6px var(--cyan); transform-origin: bottom; animation: eq 0.5s ease-in-out infinite alternate; animation-play-state: paused; }
+    .t-eq i:nth-child(2) { animation-duration: 0.36s; animation-delay: -0.2s; }
+    .t-eq i:nth-child(3) { animation-duration: 0.44s; animation-delay: -0.1s; }
+    .track:hover .t-num { color: transparent; -webkit-text-stroke-color: transparent; }
+    .track:hover .t-eq { opacity: 1; }
+    .track:hover .t-eq i { animation-play-state: running; }
+
+    /* theme switch: circle wipe from the button (View Transitions) */
+    ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+    html.vt *, html.vt *::before, html.vt *::after { transition: none !important; }
 
     /* ══════════ INTRO CURTAIN ══════════ */
     .curtain { display: none; position: fixed; inset: 0; z-index: 1000; pointer-events: none; }
@@ -709,11 +765,10 @@
       transition: transform 0.9s cubic-bezier(0.22,1,0.36,1), filter 0.5s ease;
     }
     .mv-feature:hover img, .mv-card:hover img { transform: scale(1.06); filter: saturate(1.15) contrast(1.05); }
-    /* scanlines + legibility gradient over the thumbnail */
+    /* legibility gradient over the thumbnail */
     .mv-feature::before, .mv-card::before {
       content: ''; position: absolute; inset: 0; z-index: -1;
       background:
-        repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.22) 2px 3px),
         linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 30%, transparent 45%, rgba(0,0,0,0.85) 100%);
     }
     /* red flash sweep on hover */
@@ -878,7 +933,6 @@
       color: transparent; -webkit-text-stroke: 1px var(--cyan);
       transition: color 0.25s ease;
     }
-    .track:hover .t-num { color: var(--cyan); }
     .t-name {
       flex: 1; min-width: 0;
       font-family: 'Horizon', sans-serif; font-size: clamp(0.76rem, 2.5vw, 0.96rem);
@@ -931,7 +985,6 @@
     .credits::before {
       content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
       background:
-        repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.28) 2px 3px),
         radial-gradient(circle at 92% 8%, rgba(47,123,255,0.55), transparent 55%),
         radial-gradient(circle at 0% 100%, rgba(210,30,10,0.40), transparent 50%);
     }
@@ -1042,7 +1095,6 @@
     .site-footer .footer-line { animation: none; margin-top: 16px; }
 
     @keyframes siren { from { opacity: 0.2; } to { opacity: 1; } }
-    @keyframes vhs { 0% { transform: translateY(-20vh); } 55%, 100% { transform: translateY(110vh); } }
     @keyframes barFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
     @keyframes eq { from { transform: scaleY(0.25); } to { transform: scaleY(1); } }
     @keyframes ring { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.7); opacity: 0; } }
@@ -1062,7 +1114,10 @@
       .cr-stamp svg, .cr-by strong { animation: none !important; }
       .piece, .piece img { animation: none !important; }
       .siren { animation: none !important; opacity: 0.6; }
-      .vhs { display: none; }
+      html.js .rise .ch, html.js .mv-rail-wrap .mv-card { opacity: 1; animation: none !important; }
+      html.js .mv-feature.reveal img { clip-path: none; transform: none; }
+      html.js .subtitle.reveal::before, html.js .subtitle.reveal::after { transform: none; }
+      .cursor-glow { display: none; }
       .piece { top: var(--y); transform: rotate(var(--r0)); }
     }
   </style>
@@ -1087,9 +1142,8 @@
     <div class="siren s-red"></div>
     <div class="siren s-blue"></div>
     <canvas class="embers" id="embers"></canvas>
-    <div class="vhs"></div>
+    <div class="cursor-glow" id="cursor-glow"></div>
     <div class="vignette"></div>
-    <div class="scanlines"></div>
     <div class="grain"></div>
   </div>
 
@@ -1116,7 +1170,7 @@
   <div class="page">
   <main class="wrapper">
     <p class="eyebrow glass-pill"><span class="live-dot" aria-hidden="true"></span><span data-de="JETZT ERHÄLTLICH" data-en="NOW AVAILABLE" data-scramble="0.2">NOW AVAILABLE</span></p>
-    <h1 class="album-title-big" data-text="KIDS HAVE&#10;DARK THOUGHTS">KIDS HAVE<br>DARK THOUGHTS</h1>
+    <h1 class="album-title-big" data-split data-text="KIDS HAVE&#10;DARK THOUGHTS">KIDS HAVE<br>DARK THOUGHTS</h1>
     <div class="divider" aria-hidden="true"></div>
     <p class="artist-small" data-scramble="0.6">MUMAFI</p>
 
@@ -1247,7 +1301,7 @@
 
       <a class="mv-feature reveal" href="https://youtu.be/epoNoKmvtGk" target="_blank" rel="noopener"
          data-yt="epoNoKmvtGk" data-title="KING">
-        <img src="https://i.ytimg.com/vi/epoNoKmvtGk/maxresdefault.jpg" alt="MuMaFi – King (Official Music Video)" loading="lazy" decoding="async">
+        <img src="https://i.ytimg.com/vi/epoNoKmvtGk/maxresdefault.jpg" alt="MuMaFi – King (Official Music Video)" decoding="async"><!-- not lazy: the reveal wipe fully clips it, which stops lazy loading -->
         <span class="mv-badges">
           <span class="badge hot" data-de="NEU" data-en="NEW">NEW</span>
         </span>
@@ -1262,17 +1316,17 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M15 6l-6 6 6 6"/></svg>
         </button>
         <div class="mv-rail" id="mv-rail">
-          <a class="mv-card" href="https://youtu.be/nEUZkA9WRH4" target="_blank" rel="noopener" data-yt="nEUZkA9WRH4" data-title="SPIRIT">
+          <a class="mv-card" href="https://youtu.be/nEUZkA9WRH4" target="_blank" rel="noopener" data-yt="nEUZkA9WRH4" data-title="SPIRIT" style="--i:0">
             <img src="https://i.ytimg.com/vi/nEUZkA9WRH4/sddefault.jpg" alt="MuMaFi – Spirit (Official Music Video)" loading="lazy" decoding="async">
             <span class="mv-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg></span>
             <span class="mv-info"><span class="mv-title">SPIRIT</span></span>
           </a>
-          <a class="mv-card" href="https://youtu.be/w3-5R4C4Wn4" target="_blank" rel="noopener" data-yt="w3-5R4C4Wn4" data-title="DEATH">
+          <a class="mv-card" href="https://youtu.be/w3-5R4C4Wn4" target="_blank" rel="noopener" data-yt="w3-5R4C4Wn4" data-title="DEATH" style="--i:1">
             <img src="https://i.ytimg.com/vi/w3-5R4C4Wn4/sddefault.jpg" alt="MuMaFi – Death (Official Music Video)" loading="lazy" decoding="async">
             <span class="mv-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg></span>
             <span class="mv-info"><span class="mv-title">DEATH</span></span>
           </a>
-          <a class="mv-card" href="https://youtu.be/SQu_spLt_dA" target="_blank" rel="noopener" data-yt="SQu_spLt_dA" data-title="CEO">
+          <a class="mv-card" href="https://youtu.be/SQu_spLt_dA" target="_blank" rel="noopener" data-yt="SQu_spLt_dA" data-title="CEO" style="--i:2">
             <img src="https://i.ytimg.com/vi/SQu_spLt_dA/sddefault.jpg" alt="MuMaFi – CEO (Official Music Video)" loading="lazy" decoding="async">
             <span class="mv-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg></span>
             <span class="mv-info"><span class="mv-title">CEO</span></span>
@@ -1302,8 +1356,8 @@
 
       <div class="tl-panel reveal">
         <div class="tl-head">
-          <span class="tl-meta"><b>13</b> TRACKS</span>
-          <span class="tl-meta">36:21</span>
+          <span class="tl-meta"><b data-count="13">13</b> TRACKS</span>
+          <span class="tl-meta" data-count-time="2181">36:21</span>
         </div>
         <ol class="tracks">
           <li class="track" style="--i:0">
@@ -1406,12 +1460,12 @@
           <li style="--i:1"><span class="cr-x" aria-hidden="true">✕</span><span data-de="GESCHRIEBEN" data-en="WRITTEN">WRITTEN</span></li>
           <li style="--i:2"><span class="cr-x" aria-hidden="true">✕</span><span data-de="PERFORMT" data-en="PERFORMED">PERFORMED</span></li>
         </ul>
-        <p class="cr-by"><span data-de="KOMPLETT VON" data-en="ALL BY">ALL BY</span> <strong>MUMAFI</strong></p>
+        <p class="cr-by"><span data-de="KOMPLETT VON" data-en="ALL BY">ALL BY</span> <strong class="rise" data-split style="--d:0.55s">MUMAFI</strong></p>
       </div>
     </section>
 
     <footer class="site-footer reveal">
-      <div class="mega" aria-hidden="true">MUMAFI</div>
+      <div class="mega rise" data-split aria-hidden="true">MUMAFI</div>
       <a class="to-top glass-pill" href="#top" aria-label="Back to top">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M6 11l6-6 6 6"/></svg>
       </a>
@@ -1485,9 +1539,25 @@
     }
 
     function toggleTheme() {
-      const isDark = root.classList.toggle('dark');
-      store('theme', isDark ? 'dark' : 'light');
-      updateThemeUI(true);
+      const apply = () => {
+        const isDark = root.classList.toggle('dark');
+        store('theme', isDark ? 'dark' : 'light');
+        updateThemeUI();
+      };
+      if (!document.startViewTransition || reduceMotion) { apply(); return; }
+      // circle wipe that grows out of the toggle button
+      const r = document.getElementById('theme-toggle-btn').getBoundingClientRect();
+      const x = r.left + r.width / 2, y = r.top + r.height / 2;
+      const end = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+      root.classList.add('vt');
+      const vt = document.startViewTransition(apply);
+      vt.ready.then(() => {
+        root.animate(
+          { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + end + 'px at ' + x + 'px ' + y + 'px)'] },
+          { duration: 700, easing: 'cubic-bezier(0.65,0,0.35,1)', pseudoElement: '::view-transition-new(root)' }
+        );
+      }).catch(() => {});
+      vt.finished.finally(() => root.classList.remove('vt'));
     }
 
     function applyLang(lang, animate) {
@@ -1522,6 +1592,66 @@
 
     const fine = window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
     function textFor(el) { return el.hasAttribute('data-' + currentLang) ? el.getAttribute('data-' + currentLang) : el.textContent; }
+
+
+    // split words into letters for the letter animations
+    document.querySelectorAll('[data-split]').forEach(el => {
+      let i = 0;
+      const walk = node => {
+        [...node.childNodes].forEach(n => {
+          if (n.nodeType === 3) {
+            // letters are wrapped per word so lines only break between words
+            const frag = document.createDocumentFragment();
+            n.textContent.split(/(\s+)/).forEach(part => {
+              if (!part) return;
+              if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+              const word = document.createElement('span');
+              word.className = 'word';
+              for (const c of part) {
+                const sp = document.createElement('span');
+                sp.className = 'ch';
+                sp.style.setProperty('--i', i++);
+                sp.textContent = c;
+                word.appendChild(sp);
+              }
+              frag.appendChild(word);
+            });
+            n.replaceWith(frag);
+          } else if (n.nodeType === 1 && n.tagName !== 'BR') walk(n);
+        });
+      };
+      walk(el);
+    });
+    (function () {
+      const title = document.querySelector('.album-title-big');
+      const letters = title.querySelectorAll('.ch');
+      const last = letters[letters.length - 1];
+      if (!last || reduceMotion) { title.classList.add('ready'); return; }
+      last.addEventListener('animationend', () => title.classList.add('ready'), { once: true });
+    })();
+
+    // tracklist: tiny equalizer behind each number
+    document.querySelectorAll('.t-num').forEach(n => {
+      const eq = document.createElement('span');
+      eq.className = 't-eq';
+      eq.setAttribute('aria-hidden', 'true');
+      eq.innerHTML = '<i></i><i></i><i></i>';
+      n.appendChild(eq);
+    });
+
+    // count numbers up when they scroll into view
+    function countUp(el) {
+      const isTime = el.hasAttribute('data-count-time');
+      const target = parseInt(el.getAttribute(isTime ? 'data-count-time' : 'data-count'), 10);
+      const fmt = v => isTime ? Math.floor(v / 60) + ':' + String(v % 60).padStart(2, '0') : String(v);
+      if (reduceMotion) { el.textContent = fmt(target); return; }
+      const t0 = performance.now(), dur = 1100;
+      (function step(now) {
+        const k = Math.min(1, (now - t0) / dur);
+        el.textContent = fmt(Math.round(target * (1 - Math.pow(1 - k, 3))));
+        if (k < 1) requestAnimationFrame(step);
+      })(t0);
+    }
 
     // intro: decode each text as it slides in (after the curtain, if any)
     function startPageIntro() {
@@ -1578,6 +1708,75 @@
       }, { passive: true });
     }
 
+
+    // ── pointer & scroll motion (skipped with reduced motion) ──
+    if (!reduceMotion) {
+      // page scroll → --sy for title parallax and tape drift
+      let sTick = false;
+      const setSy = () => { root.style.setProperty('--sy', Math.min(scrollY, 1200).toFixed(0)); sTick = false; };
+      window.addEventListener('scroll', () => { if (!sTick) { sTick = true; requestAnimationFrame(setSy); } }, { passive: true });
+      setSy();
+
+      // ripple on press
+      document.querySelectorAll('.link-btn, .yt-cta, .mv-feature, .mv-card, .t-mv').forEach(el => {
+        el.addEventListener('pointerdown', e => {
+          const r = el.getBoundingClientRect();
+          const size = Math.max(r.width, r.height) * 2.2;
+          const rp = document.createElement('span');
+          rp.className = 'ripple';
+          rp.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + (e.clientX - r.left - size / 2) + 'px;top:' + (e.clientY - r.top - size / 2) + 'px';
+          el.appendChild(rp);
+          rp.addEventListener('animationend', () => rp.remove());
+        });
+      });
+    }
+
+    if (fine && !reduceMotion) {
+      // links tilt towards the pointer
+      document.querySelectorAll('.link-btn').forEach(btn => {
+        btn.addEventListener('pointermove', e => {
+          const r = btn.getBoundingClientRect();
+          btn.style.setProperty('--rx', (((e.clientX - r.left) / r.width - 0.5) * 5).toFixed(2) + 'deg');
+          btn.style.setProperty('--ry', (((e.clientY - r.top) / r.height - 0.5) * -8).toFixed(2) + 'deg');
+        });
+        btn.addEventListener('pointerleave', () => { btn.style.removeProperty('--rx'); btn.style.removeProperty('--ry'); });
+      });
+
+      // magnetic buttons: ease towards the pointer, spring back on leave
+      document.querySelectorAll('.icon-btn, .to-top, .mv-nav, .lb-btn, .mv-play, .link-arrow').forEach(el => {
+        const host = el.closest('.mv-feature, .mv-card, .link-btn') || el;
+        const k = host === el ? 0.3 : 0.12;
+        let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+        const loop = () => {
+          cx += (tx - cx) * 0.18; cy += (ty - cy) * 0.18;
+          el.style.translate = cx.toFixed(2) + 'px ' + cy.toFixed(2) + 'px';
+          raf = (Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05) ? requestAnimationFrame(loop) : 0;
+        };
+        host.addEventListener('pointermove', e => {
+          const r = el.getBoundingClientRect();
+          tx = (e.clientX - (r.left + r.width / 2)) * k;
+          ty = (e.clientY - (r.top + r.height / 2)) * k;
+          if (!raf) raf = requestAnimationFrame(loop);
+        });
+        host.addEventListener('pointerleave', () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(loop); });
+      });
+
+      // soft glow trailing the cursor
+      const glow = document.getElementById('cursor-glow');
+      let gx = innerWidth / 2, gy = innerHeight / 2, mx = gx, my = gy, graf = 0;
+      const glowLoop = () => {
+        gx += (mx - gx) * 0.12; gy += (my - gy) * 0.12;
+        glow.style.transform = 'translate3d(' + gx.toFixed(1) + 'px,' + gy.toFixed(1) + 'px,0)';
+        graf = (Math.abs(mx - gx) > 0.3 || Math.abs(my - gy) > 0.3) ? requestAnimationFrame(glowLoop) : 0;
+      };
+      window.addEventListener('pointermove', e => {
+        mx = e.clientX; my = e.clientY;
+        glow.classList.add('on');
+        if (!graf) graf = requestAnimationFrame(glowLoop);
+      }, { passive: true });
+      document.addEventListener('pointerleave', () => glow.classList.remove('on'));
+    }
+
     // featured video tilts towards the pointer
     const feature = document.querySelector('.mv-feature');
     if (fine && !reduceMotion && feature) {
@@ -1603,6 +1802,8 @@
           if (!en.isIntersecting) return;
           en.target.classList.add('in');
           en.target.querySelectorAll('[data-scramble-view]').forEach(el => scramble(el, textFor(el), 700));
+          en.target.querySelectorAll('[data-count], [data-count-time]').forEach(countUp);
+          en.target.querySelectorAll('.rise').forEach(el => el.classList.add('in'));
           io.unobserve(en.target);
         });
       }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
@@ -1783,7 +1984,8 @@
           p.ph += 0.02 * dt;
           p.x += (p.vx + Math.sin(p.ph) * 0.25) * dt;
           if (p.y < -10) Object.assign(p, spawn(false));
-          const alpha = p.a * (0.6 + 0.4 * Math.sin(p.ph * 3)) * (dark ? 1 : 0.55);
+          if (!dark && parts.indexOf(p) % 2) continue; // half as many, softer, in light mode
+          const alpha = p.a * (0.6 + 0.4 * Math.sin(p.ph * 3)) * (dark ? 1 : 0.35);
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.r * 2.8, 0, 6.283);
           ctx.fillStyle = (p.blue ? 'rgba(40,120,255,' : 'rgba(255,70,30,') + (alpha * 0.16).toFixed(3) + ')';
