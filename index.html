@@ -50,6 +50,7 @@
       --scan: rgba(0,0,0,0.035);
       --vignette: rgba(60,20,10,0.10);
       --glitch-blend: multiply;
+      --line: rgba(0,0,0,0.07);
     }
     :root.dark {
       --bg: #050506;
@@ -70,6 +71,7 @@
       --scan: rgba(0,0,0,0.28);
       --vignette: rgba(0,0,0,0.72);
       --glitch-blend: screen;
+      --line: rgba(255,255,255,0.07);
     }
 
     html { background: var(--bg); transition: background 0.5s ease; -webkit-text-size-adjust: 100%; }
@@ -604,6 +606,30 @@
     html.intro body *:not(.curtain *)::before,
     html.intro body *:not(.curtain *)::after { animation-play-state: paused !important; }
 
+    /* ══════════ FALLING ART ══════════ */
+    .fall { position: fixed; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+    .piece {
+      position: absolute; top: 0; left: var(--x);
+      width: var(--w); margin-left: calc(var(--w) / -2);
+      will-change: transform;
+      animation: fall var(--dur) linear var(--delay) infinite;
+    }
+    .piece img {
+      display: block; width: 100%; height: auto;
+      opacity: var(--o);
+      filter: drop-shadow(0 14px 18px rgba(0,0,0,0.35));
+      animation: sway var(--sway-dur) ease-in-out var(--delay) infinite alternate;
+    }
+    :root:not(.dark) .piece img { filter: drop-shadow(0 10px 14px rgba(60,20,10,0.18)); }
+    @keyframes fall {
+      from { transform: translate3d(0, calc(-100% - 4vh), 0) rotate(var(--r0)); }
+      to   { transform: translate3d(var(--dx), 106vh, 0) rotate(var(--r1)); }
+    }
+    @keyframes sway {
+      from { transform: translateX(calc(var(--sw) * -1)) rotate(-9deg); }
+      to   { transform: translateX(var(--sw)) rotate(9deg); }
+    }
+
     /* ══════════ EMBERS / PROGRESS / TOAST ══════════ */
     .embers { position: absolute; inset: 0; width: 100%; height: 100%; }
 
@@ -797,6 +823,182 @@
     .yt-cta .link-arrow { border-color: rgba(255,255,255,0.35); color: #fff; opacity: 0.9; }
     .yt-cta:hover .link-arrow { background: #fff; color: #c0200a; transform: translateX(3px) rotate(-45deg); }
 
+    /* ══════════ TRACKLIST ══════════ */
+    .tl-section { width: 100%; margin-top: clamp(52px, 10vw, 84px); }
+    .tl-section .subtitle { margin-top: 0; }
+    .tl-panel {
+      position: relative; overflow: hidden;
+      background: var(--glass-bg);
+      backdrop-filter: blur(22px) saturate(1.8); -webkit-backdrop-filter: blur(22px) saturate(1.8);
+      border: 1px solid var(--glass-border); border-radius: 16px;
+      box-shadow: 0 10px 30px -14px var(--glass-shadow), inset 0 1px 0 var(--glass-hi);
+    }
+    .tl-head, .tl-foot {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 14px 18px;
+    }
+    .tl-head { border-bottom: 1px solid var(--line); }
+    .tl-foot { border-top: 1px solid var(--line); }
+    .tl-album {
+      font-family: 'Horizon', sans-serif; font-size: clamp(0.6rem, 1.8vw, 0.76rem);
+      letter-spacing: 0.08em; text-transform: uppercase; -webkit-text-stroke: 0.3px var(--red);
+    }
+    .tl-meta, .tl-foot {
+      font-family: Arial, sans-serif; font-weight: 700; font-size: 0.55rem; letter-spacing: 0.2em;
+      color: var(--muted); text-transform: uppercase; white-space: nowrap;
+    }
+    .tl-meta b { color: var(--red-hot); }
+    .tl-foot a {
+      color: var(--text); text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: color 0.2s ease;
+    }
+    .tl-foot a:hover { color: #1DB954; }
+    .tl-foot a svg { width: 10px; height: 10px; }
+
+    .tracks { list-style: none; }
+    .track {
+      position: relative; isolation: isolate;
+      display: flex; align-items: center; gap: clamp(10px, 2.6vw, 14px);
+      padding: clamp(10px, 2.4vw, 13px) 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .track:last-child { border-bottom: none; }
+    .track::before {
+      content: ''; position: absolute; inset: 0; z-index: -1;
+      background: linear-gradient(90deg, rgba(255,42,20,0.24), rgba(255,42,20,0) 78%);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
+    }
+    .track::after {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--red-hot); box-shadow: 0 0 12px var(--red-hot);
+      transform: scaleY(0); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+    }
+    .track:hover::before, .track:focus-within::before { transform: scaleX(1); }
+    .track:hover::after, .track:focus-within::after { transform: scaleY(1); }
+    .t-num {
+      flex-shrink: 0; width: 2.1em;
+      font-family: 'Horizon', sans-serif; font-size: clamp(0.8rem, 2.4vw, 0.95rem);
+      color: transparent; -webkit-text-stroke: 1px var(--red-hot);
+      transition: color 0.25s ease;
+    }
+    .track:hover .t-num { color: var(--red-hot); }
+    .t-name {
+      flex: 1; min-width: 0;
+      font-family: 'Horizon', sans-serif; font-size: clamp(0.76rem, 2.5vw, 0.96rem);
+      letter-spacing: 0.05em; text-transform: uppercase;
+      transition: translate 0.35s cubic-bezier(0.22,1,0.36,1);
+    }
+    .track:hover .t-name { translate: 6px 0; animation: rgbSplit 0.5s steps(1) 1; }
+    .t-link { color: var(--text); text-decoration: none; outline: none; }
+    .t-link::after { content: ''; position: absolute; inset: 0; } /* whole row opens the track */
+    .track:has(.t-link:focus-visible) { outline: 2px solid var(--red-hot); outline-offset: -2px; }
+    .t-e {
+      flex-shrink: 0; width: 15px; height: 15px; border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: Arial, sans-serif; font-weight: 700; font-size: 0.5rem;
+      background: var(--muted); color: var(--bg);
+    }
+    .t-mv {
+      position: relative; z-index: 1; flex-shrink: 0;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 9px; border-radius: 20px;
+      font-family: Arial, sans-serif; font-weight: 700; font-size: 0.5rem; letter-spacing: 0.16em;
+      color: #fff; text-decoration: none; background: var(--red-hot);
+      box-shadow: 0 0 14px rgba(255,42,20,0.45);
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+    }
+    .t-mv:hover { transform: scale(1.08); box-shadow: 0 0 24px rgba(255,42,20,0.8); }
+    .t-mv:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    .t-mv svg { width: 8px; height: 8px; }
+    .t-dur {
+      flex-shrink: 0; min-width: 2.8em; text-align: right;
+      font-family: Arial, sans-serif; font-weight: 700; font-size: 0.62rem; letter-spacing: 0.06em;
+      color: var(--muted); font-variant-numeric: tabular-nums;
+    }
+    @media (max-width: 380px) {
+      .track, .tl-head, .tl-foot { padding-left: 13px; padding-right: 13px; }
+      .t-mv { padding: 6px; }
+      .t-mv span { display: none; }
+    }
+    html.js .tl-panel .track { opacity: 0; }
+    html.js .tl-panel.in .track { animation: trackIn 0.6s cubic-bezier(0.22,1,0.36,1) calc(0.1s + var(--i) * 45ms) both; }
+
+    /* credits: produced / written / performed */
+    .credits {
+      position: relative; overflow: hidden; isolation: isolate;
+      margin-top: 14px;
+      padding: clamp(20px, 5vw, 30px) clamp(18px, 4.5vw, 28px);
+      border-radius: 16px;
+      background: linear-gradient(160deg, #141417, #060607);
+      color: #f4f4f6;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 50px -24px rgba(0,0,0,0.75);
+    }
+    .credits::before {
+      content: ''; position: absolute; inset: 0; z-index: -1;
+      background:
+        repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.28) 2px 3px),
+        radial-gradient(circle at 88% 12%, rgba(210,30,10,0.5), transparent 55%),
+        radial-gradient(circle at 0% 100%, rgba(120,6,20,0.45), transparent 50%);
+    }
+    .cr-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .cr-kicker {
+      display: flex; align-items: center; gap: 10px; margin-top: 6px;
+      font-family: Arial, sans-serif; font-weight: 700; font-size: 0.58rem; letter-spacing: 0.3em;
+      color: rgba(255,255,255,0.6); text-transform: uppercase;
+    }
+    .cr-kicker::before { content: ''; width: 18px; height: 2px; background: var(--red-hot); box-shadow: 0 0 8px var(--red-hot); }
+    .cr-stamp {
+      position: relative; flex-shrink: 0;
+      width: clamp(88px, 25vw, 124px); aspect-ratio: 1;
+      margin: -6px -6px -18px 0;
+    }
+    .cr-stamp svg { width: 100%; height: 100%; animation: spin 16s linear infinite; }
+    .cr-core {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    }
+    .cr-core b {
+      font-family: 'Horizon', sans-serif; font-weight: normal; font-size: clamp(0.8rem, 2.6vw, 1.05rem);
+      color: var(--red-hot); text-shadow: 0 0 14px rgba(255,42,20,0.7);
+    }
+    .cr-core small { font-family: Arial, sans-serif; font-weight: 700; font-size: 0.42rem; letter-spacing: 0.24em; opacity: 0.7; }
+    .cr-list { list-style: none; margin-top: 8px; }
+    .cr-list li {
+      display: flex; align-items: center; gap: 0.45em;
+      font-family: 'Horizon', sans-serif; font-size: clamp(1.3rem, 6.2vw, 2.25rem);
+      line-height: 1.1; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .cr-x {
+      font-family: Arial, sans-serif; font-weight: 700; font-size: 0.55em; width: 1em;
+      color: var(--red-hot); text-shadow: 0 0 12px rgba(255,42,20,0.8);
+    }
+    html.js .credits .cr-list li { clip-path: inset(0 100% 0 0); }
+    html.js .credits.in .cr-list li { animation: wipeIn 0.75s cubic-bezier(0.77,0,0.18,1) calc(0.2s + var(--i) * 0.13s) both; }
+    .cr-by {
+      display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 12px; margin-top: 14px;
+      font-family: Arial, sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.3em;
+      color: rgba(255,255,255,0.6); text-transform: uppercase;
+    }
+    .cr-by strong {
+      display: inline-block;
+      font-family: 'Horizon', sans-serif; font-weight: normal; font-size: clamp(1.9rem, 9vw, 3.3rem);
+      letter-spacing: 0.05em; color: var(--red-hot);
+      text-shadow: -2px 0 rgba(255,30,50,0.6), 2px 0 rgba(0,200,255,0.45), 0 0 30px rgba(255,42,20,0.5);
+      animation: jitter 5.5s steps(1) 3s infinite;
+    }
+    .cr-line {
+      margin-top: 10px;
+      font-family: Arial, sans-serif; font-weight: 700; font-size: 0.6rem; letter-spacing: 0.22em;
+      color: rgba(255,255,255,0.5); text-transform: uppercase;
+    }
+
+    @keyframes trackIn { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: none; } }
+    @keyframes wipeIn { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     /* ══════════ LIGHTBOX ══════════ */
     .lightbox {
       width: min(94vw, 1000px); max-width: none; max-height: none;
@@ -868,6 +1070,11 @@
       *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
       .blob, .grain, .tape-track, .album-title-big, .album-title-big::before, .album-title-big::after, .eq i, .mv-play::before { animation: none !important; }
       html.js .reveal { opacity: 1; translate: none; }
+      html.js .tl-panel .track { opacity: 1; animation: none !important; }
+      html.js .credits .cr-list li { clip-path: none; animation: none !important; }
+      .cr-stamp svg, .cr-by strong { animation: none !important; }
+      .piece, .piece img { animation: none !important; }
+      .piece { top: var(--y); transform: rotate(var(--r0)); }
     }
   </style>
 </head>
@@ -893,6 +1100,8 @@
     <div class="scanlines"></div>
     <div class="grain"></div>
   </div>
+
+  <div class="fall" id="fall" aria-hidden="true"></div>
 
   <div class="rail left" aria-hidden="true">KIDS HAVE DARK THOUGHTS</div>
   <div class="rail right" aria-hidden="true">MUMAFI <b>✦</b> 2026</div>
@@ -1097,6 +1306,129 @@
         </span>
         <span class="link-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </a>
+    </section>
+
+    <!-- ══ TRACKLIST ══ -->
+    <section class="tl-section" aria-labelledby="tl-heading">
+      <p class="subtitle reveal">
+        <em id="tl-heading" data-scramble-view>TRACKLIST</em>
+      </p>
+
+      <div class="tl-panel reveal">
+        <div class="tl-head">
+          <span class="tl-album">Kids Have Dark Thoughts</span>
+          <span class="tl-meta"><b>13</b> TRACKS · 36:21</span>
+        </div>
+        <ol class="tracks">
+          <li class="track" style="--i:0">
+            <span class="t-num">01</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/6WcyYDBWj7uHi3ZDl0aECh" target="_blank" rel="noopener">0 KMH</a></span>
+            <span class="t-dur">0:58</span>
+          </li>
+          <li class="track" style="--i:1">
+            <span class="t-num">02</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/3kF9JEf8DOQdizWyCooduk" target="_blank" rel="noopener">200 KMH</a></span>
+            <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
+            <span class="t-dur">2:46</span>
+          </li>
+          <li class="track" style="--i:2">
+            <span class="t-num">03</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/2sIL8zuyl0ehlJzBVn6lnv" target="_blank" rel="noopener">ONE BY ONE</a></span>
+            <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
+            <span class="t-dur">2:53</span>
+          </li>
+          <li class="track" style="--i:3">
+            <span class="t-num">04</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/28kekMT1gvD1a8TlAvL5vM" target="_blank" rel="noopener">KING</a></span>
+            <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
+            <a class="t-mv" href="https://youtu.be/epoNoKmvtGk" target="_blank" rel="noopener" data-yt="epoNoKmvtGk" data-title="KING" aria-label="KING – Music video"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg><span>VIDEO</span></a>
+            <span class="t-dur">2:36</span>
+          </li>
+          <li class="track" style="--i:4">
+            <span class="t-num">05</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/42V8UaV8CM477E5kQQio7l" target="_blank" rel="noopener">PASSIERT</a></span>
+            <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
+            <span class="t-dur">3:06</span>
+          </li>
+          <li class="track" style="--i:5">
+            <span class="t-num">06</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/4k1i5x9ZGiHfvO75IiElI5" target="_blank" rel="noopener">TALENT IN ME</a></span>
+            <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
+            <span class="t-dur">3:00</span>
+          </li>
+          <li class="track" style="--i:6">
+            <span class="t-num">07</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/0lLENYZx2AKWOOwIGWZ8ca" target="_blank" rel="noopener">SING ALONG</a></span>
+            <span class="t-dur">3:33</span>
+          </li>
+          <li class="track" style="--i:7">
+            <span class="t-num">08</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/41shvDIxE1j16Uge2WbrSJ" target="_blank" rel="noopener">CRAZY</a></span>
+            <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
+            <span class="t-dur">3:23</span>
+          </li>
+          <li class="track" style="--i:8">
+            <span class="t-num">09</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/6RX5tCd9A4U7V1odkkTV4C" target="_blank" rel="noopener">DEATH</a></span>
+            <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
+            <a class="t-mv" href="https://youtu.be/w3-5R4C4Wn4" target="_blank" rel="noopener" data-yt="w3-5R4C4Wn4" data-title="DEATH" aria-label="DEATH – Music video"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg><span>VIDEO</span></a>
+            <span class="t-dur">2:44</span>
+          </li>
+          <li class="track" style="--i:9">
+            <span class="t-num">10</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/3K0oh0jRb3SQ5bVDKvbDbG" target="_blank" rel="noopener">VIBE</a></span>
+            <span class="t-dur">3:02</span>
+          </li>
+          <li class="track" style="--i:10">
+            <span class="t-num">11</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/4XUsfL1g3IZpynd7AvbP2A" target="_blank" rel="noopener">SPIRIT</a></span>
+            <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
+            <a class="t-mv" href="https://youtu.be/nEUZkA9WRH4" target="_blank" rel="noopener" data-yt="nEUZkA9WRH4" data-title="SPIRIT" aria-label="SPIRIT – Music video"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg><span>VIDEO</span></a>
+            <span class="t-dur">2:44</span>
+          </li>
+          <li class="track" style="--i:11">
+            <span class="t-num">12</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/6PCPwqhSAh98O11mn34mOS" target="_blank" rel="noopener">CEO</a></span>
+            <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
+            <a class="t-mv" href="https://youtu.be/SQu_spLt_dA" target="_blank" rel="noopener" data-yt="SQu_spLt_dA" data-title="CEO" aria-label="CEO – Music video"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg><span>VIDEO</span></a>
+            <span class="t-dur">2:54</span>
+          </li>
+          <li class="track" style="--i:12">
+            <span class="t-num">13</span>
+            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/06ShsdxAh77hwxhW8ROxVG" target="_blank" rel="noopener">DRUG-STORY</a></span>
+            <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
+            <span class="t-dur">2:42</span>
+          </li>
+        </ol>
+        <div class="tl-foot">
+          <span>℗ 2026 MUMAFI</span>
+          <a href="https://open.spotify.com/album/3zCmlFlw9Bda4tv4WcCGLc" target="_blank" rel="noopener"><span data-de="ALBUM AUF SPOTIFY" data-en="FULL ALBUM ON SPOTIFY">FULL ALBUM ON SPOTIFY</span> <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M9 7h8v8"/></svg></a>
+        </div>
+      </div>
+
+      <div class="credits reveal">
+        <div class="cr-top">
+          <p class="cr-kicker" data-de="ALLE 13 TRACKS" data-en="ALL 13 TRACKS">ALL 13 TRACKS</p>
+          <div class="cr-stamp" aria-hidden="true">
+            <svg viewBox="0 0 200 200">
+              <defs><path id="cr-circle" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs>
+              <circle cx="100" cy="100" r="97" fill="none" stroke="rgba(255,42,20,0.65)" stroke-width="1.5"/>
+              <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,42,20,0.4)" stroke-width="1"/>
+              <text font-family="Arial, sans-serif" font-weight="700" font-size="14" letter-spacing="2" fill="#f4f4f6">
+                <textPath href="#cr-circle" textLength="488" lengthAdjust="spacing" data-de="PRODUZIERT ✦ GESCHRIEBEN ✦ PERFORMT ✦ " data-en="PRODUCED ✦ WRITTEN ✦ PERFORMED ✦ ">PRODUCED ✦ WRITTEN ✦ PERFORMED ✦ </textPath>
+              </text>
+            </svg>
+            <span class="cr-core"><b>100%</b><small>MUMAFI</small></span>
+          </div>
+        </div>
+        <ul class="cr-list">
+          <li style="--i:0"><span class="cr-x" aria-hidden="true">✕</span><span data-de="PRODUZIERT" data-en="PRODUCED">PRODUCED</span></li>
+          <li style="--i:1"><span class="cr-x" aria-hidden="true">✕</span><span data-de="GESCHRIEBEN" data-en="WRITTEN">WRITTEN</span></li>
+          <li style="--i:2"><span class="cr-x" aria-hidden="true">✕</span><span data-de="PERFORMT" data-en="PERFORMED">PERFORMED</span></li>
+        </ul>
+        <p class="cr-by"><span data-de="KOMPLETT VON" data-en="ALL BY">ALL BY</span> <strong>MUMAFI</strong></p>
+        <p class="cr-line" data-de="Jeder Beat. Jede Zeile. Jede Stimme." data-en="Every beat. Every bar. Every vocal.">Every beat. Every bar. Every vocal.</p>
+      </div>
     </section>
 
     <footer class="site-footer reveal">
@@ -1402,6 +1734,48 @@
         toast(url);
       }
     }
+
+    // falling art: spread across the width, random size/speed/spin, already mid-fall on load
+    (function () {
+      const layer = document.getElementById('fall');
+      if (!layer) return;
+      const art = ['art/teal.webp', 'art/red.webp'];
+      const small = innerWidth < 600;
+      const n = small ? 5 : 8;
+      const r = (a, b) => a + Math.random() * (b - a);
+      // wide screens: most pieces fall in the side gutters, two drift through the middle
+      const gutter = innerWidth >= 900 ? ((innerWidth - 580) / 2 / innerWidth) * 100 : 0;
+      const xFor = i => {
+        if (gutter && i < n - 2) return i % 2 ? r(3, gutter - 3) : r(100 - gutter + 3, 97);
+        return ((i + r(0.15, 0.85)) / n) * 100;
+      };
+      for (let i = 0; i < n; i++) {
+        const dur = r(15, 28);
+        const spin = r(120, 260) * (Math.random() < 0.5 ? -1 : 1);
+        const r0 = r(0, 360);
+        const piece = document.createElement('div');
+        piece.className = 'piece';
+        piece.style.cssText = [
+          '--x:' + xFor(i).toFixed(1) + '%',
+          '--y:' + r(5, 85).toFixed(1) + '%',
+          '--w:' + Math.round(small ? r(48, 92) : r(70, 150)) + 'px',
+          '--dur:' + dur.toFixed(1) + 's',
+          '--delay:' + (-r(0, dur)).toFixed(1) + 's',
+          '--dx:' + r(-8, 8).toFixed(1) + 'vw',
+          '--r0:' + r0.toFixed(0) + 'deg',
+          '--r1:' + (r0 + spin).toFixed(0) + 'deg',
+          '--sw:' + Math.round(r(10, 34)) + 'px',
+          '--sway-dur:' + r(2.4, 4.8).toFixed(1) + 's',
+          '--o:' + r(0.78, 1).toFixed(2)
+        ].join(';');
+        const img = new Image();
+        img.src = art[i % art.length];
+        img.alt = '';
+        img.decoding = 'async';
+        piece.appendChild(img);
+        layer.appendChild(piece);
+      }
+    })();
 
     // embers drifting up through the background
     (function () {
