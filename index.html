@@ -617,10 +617,10 @@
     .piece img {
       display: block; width: 100%; height: auto;
       opacity: var(--o);
-      filter: drop-shadow(0 14px 18px rgba(0,0,0,0.35));
+      filter: drop-shadow(0 5px 7px rgba(0,0,0,0.35));
       animation: sway var(--sway-dur) ease-in-out var(--delay) infinite alternate;
     }
-    :root:not(.dark) .piece img { filter: drop-shadow(0 10px 14px rgba(60,20,10,0.18)); }
+    :root:not(.dark) .piece img { filter: drop-shadow(0 4px 6px rgba(60,20,10,0.18)); }
     @keyframes fall {
       from { transform: translate3d(0, calc(-100% - 4vh), 0) rotate(var(--r0)); }
       to   { transform: translate3d(var(--dx), 106vh, 0) rotate(var(--r1)); }
@@ -1758,13 +1758,13 @@
         piece.style.cssText = [
           '--x:' + xFor(i).toFixed(1) + '%',
           '--y:' + r(5, 85).toFixed(1) + '%',
-          '--w:' + Math.round(small ? r(48, 92) : r(70, 150)) + 'px',
+          '--w:' + Math.round(small ? r(20, 36) : r(26, 52)) + 'px',
           '--dur:' + dur.toFixed(1) + 's',
           '--delay:' + (-r(0, dur)).toFixed(1) + 's',
           '--dx:' + r(-8, 8).toFixed(1) + 'vw',
           '--r0:' + r0.toFixed(0) + 'deg',
           '--r1:' + (r0 + spin).toFixed(0) + 'deg',
-          '--sw:' + Math.round(r(10, 34)) + 'px',
+          '--sw:' + Math.round(r(6, 16)) + 'px',
           '--sway-dur:' + r(2.4, 4.8).toFixed(1) + 's',
           '--o:' + r(0.78, 1).toFixed(2)
         ].join(';');
