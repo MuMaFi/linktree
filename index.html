@@ -35,6 +35,8 @@
       --red: #c0200a;
       --red-hot: #ff2a14;
       --ice: #7ecde8;
+      --blue: #2f7bff;
+      --cyan: #19d3ff;
       --glass-bg:     rgba(255,255,255,0.52);
       --glass-hi:     rgba(255,255,255,0.92);
       --glass-border: rgba(255,255,255,0.75);
@@ -43,9 +45,11 @@
       --pill-bg:      rgba(255,255,255,0.95);
       --pill-text:    #0b0b0d;
       --divider:      rgba(11,11,13,0.45);
-      --blob-a: rgba(192,32,10,0.34);
-      --blob-b: rgba(126,205,232,0.55);
-      --blob-c: rgba(255,120,90,0.28);
+      --blob-a: rgba(192,32,10,0.30);
+      --blob-b: rgba(60,140,255,0.45);
+      --blob-c: rgba(126,205,232,0.50);
+      --siren-r: rgba(255,40,20,0.18);
+      --siren-b: rgba(40,120,255,0.24);
       --grain: 0.09;
       --scan: rgba(0,0,0,0.035);
       --vignette: rgba(60,20,10,0.10);
@@ -64,9 +68,11 @@
       --pill-bg:      rgba(255,255,255,0.14);
       --pill-text:    #ffffff;
       --divider:      rgba(255,255,255,0.38);
-      --blob-a: rgba(200,24,8,0.50);
-      --blob-b: rgba(30,90,140,0.30);
-      --blob-c: rgba(130,6,24,0.42);
+      --blob-a: rgba(200,24,8,0.46);
+      --blob-b: rgba(30,100,255,0.42);
+      --blob-c: rgba(0,160,255,0.24);
+      --siren-r: rgba(255,30,20,0.34);
+      --siren-b: rgba(30,110,255,0.48);
       --grain: 0.13;
       --scan: rgba(0,0,0,0.28);
       --vignette: rgba(0,0,0,0.72);
@@ -75,7 +81,7 @@
     }
 
     html { background: var(--bg); transition: background 0.5s ease; -webkit-text-size-adjust: 100%; }
-    ::selection { background: var(--red-hot); color: #fff; }
+    ::selection { background: var(--blue); color: #fff; }
 
     body {
       min-height: 100vh; min-height: 100svh;
@@ -105,6 +111,23 @@
     .blob.b2 { --c: var(--blob-b); width: 90vmax; height: 90vmax; bottom: -44vmax; right: -38vmax; animation-duration: 32s; animation-delay: -10s; }
     .blob.b3 { --c: var(--blob-c); width: 55vmax; height: 55vmax; top: 36%; left: 55%; animation-duration: 38s; animation-delay: -20s; }
 
+    /* police-light glows, red and blue taking turns */
+    .siren {
+      position: absolute; top: -32vmax; width: 72vmax; height: 72vmax; border-radius: 50%;
+      animation: siren 3.2s ease-in-out infinite alternate;
+    }
+    .siren.s-red  { left: -26vmax;  background: radial-gradient(circle, var(--siren-r), transparent 62%); }
+    .siren.s-blue { right: -26vmax; background: radial-gradient(circle, var(--siren-b), transparent 62%); animation-delay: -1.6s; }
+    /* VHS tracking band rolling down the screen */
+    .vhs {
+      position: absolute; left: 0; right: 0; top: 0; height: 14vh;
+      background: linear-gradient(180deg, transparent, rgba(150,200,255,0.05) 38%, rgba(255,255,255,0.08) 50%, rgba(150,200,255,0.05) 62%, transparent);
+      mix-blend-mode: screen;
+      animation: vhs 9s linear infinite;
+      will-change: transform;
+    }
+    :root:not(.dark) .vhs { mix-blend-mode: normal; background: linear-gradient(180deg, transparent, rgba(40,90,220,0.04) 45%, rgba(40,90,220,0.06) 50%, rgba(40,90,220,0.04) 55%, transparent); }
+
     .vignette {
       position: absolute; inset: 0;
       background: radial-gradient(ellipse at 50% 42%, transparent 40%, var(--vignette) 100%);
@@ -121,21 +144,6 @@
       will-change: transform;
     }
 
-    /* side rails (wide screens only) */
-    .rail {
-      position: fixed; top: 50%; z-index: 1;
-      display: none; align-items: center; gap: 18px;
-      writing-mode: vertical-rl; white-space: nowrap;
-      font-family: 'Horizon', sans-serif; font-size: 0.6rem; letter-spacing: 0.42em;
-      color: var(--muted); text-transform: uppercase;
-      pointer-events: none;
-      animation: fadeIn 1.2s ease 1.8s backwards;
-    }
-    .rail::before, .rail::after { content: ''; width: 1px; height: 60px; background: currentColor; opacity: 0.5; }
-    .rail.left  { left: 30px;  transform: translateY(-50%) rotate(180deg); }
-    .rail.right { right: 30px; transform: translateY(-50%); }
-    .rail b { color: var(--red-hot); font-weight: normal; }
-    @media (min-width: 1000px) { .rail { display: flex; } }
 
     /* ── TOP BAR ── */
     .top-bar {
@@ -188,10 +196,11 @@
     .theme-toggle:active { transform: scale(0.96); }
     .theme-toggle svg { width: 14px; height: 14px; transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1); }
     .theme-toggle:hover svg { transform: rotate(-20deg); }
-    .theme-toggle .ic-sun { display: none; }
-    :root.dark .theme-toggle .ic-sun { display: block; }
-    :root.dark .theme-toggle .ic-moon { display: none; }
-    #theme-icon { min-width: 4.4em; text-align: left; }
+    .theme-btn .ic-sun { display: none; }
+    :root.dark .theme-btn .ic-sun { display: block; }
+    :root.dark .theme-btn .ic-moon { display: none; }
+    .theme-btn:hover svg { transform: rotate(-20deg); }
+    .icon-btn svg { transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1); }
 
     /* ── PAGE ── clips anything that pokes out sideways (slam, tapes, mega text) */
     .page {
@@ -252,7 +261,7 @@
       text-shadow:
         calc(-1.5px + var(--ax) * -4px) calc(var(--ay) * -2px) rgba(255,30,50,0.55),
         calc(1.5px + var(--ax) * 4px) calc(var(--ay) * 2px) rgba(0,200,255,0.35),
-        0 0 36px rgba(210,30,10,0.50), 0 0 90px rgba(210,30,10,0.20);
+        0 0 36px rgba(210,30,10,0.45), 0 0 90px rgba(47,123,255,0.28);
     }
     .album-title-big::before,
     .album-title-big::after {
@@ -272,7 +281,7 @@
     .divider {
       position: relative;
       width: 100%; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--divider) 30%, var(--red-hot) 50%, var(--divider) 70%, transparent);
+      background: linear-gradient(90deg, transparent, var(--blue) 25%, var(--red-hot) 50%, var(--blue) 75%, transparent);
       margin: 20px 0 16px;
       transform-origin: center;
       animation: lineGrow 1.2s cubic-bezier(0.22,1,0.36,1) 0.55s backwards;
@@ -306,7 +315,7 @@
       box-shadow: 0 12px 30px -12px rgba(0,0,0,0.55);
     }
     .tape-back  {
-      background: var(--text); color: var(--bg);
+      background: var(--blue); color: #fff;
       transform: translateY(-50%) rotate(2.4deg);
       animation: tapeInBack 1s cubic-bezier(0.22,1,0.36,1) 0.75s backwards;
     }
@@ -343,7 +352,7 @@
 
     /* little equalizer next to "stream now" */
     .eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 11px; margin-right: 10px; vertical-align: -1px; }
-    .eq i { width: 2px; height: 100%; background: var(--red-hot); border-radius: 1px; transform-origin: bottom; animation: eq 0.9s ease-in-out infinite alternate; }
+    .eq i { width: 2px; height: 100%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan); border-radius: 1px; transform-origin: bottom; animation: eq 0.9s ease-in-out infinite alternate; }
     .eq i:nth-child(2) { animation-duration: 0.6s; animation-delay: -0.3s; }
     .eq i:nth-child(3) { animation-duration: 0.75s; animation-delay: -0.5s; }
     .eq i:nth-child(4) { animation-duration: 0.5s; animation-delay: -0.1s; }
@@ -447,7 +456,6 @@
       color: var(--muted);
     }
     .link-idx { color: rgb(var(--brand)); margin-right: 0.35em; }
-    .link-idx::after { content: ' /'; color: var(--muted); }
 
     .link-title {
       font-family: 'Horizon', sans-serif; font-weight: normal;
@@ -635,8 +643,8 @@
 
     .progress {
       position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 200;
-      background: linear-gradient(90deg, var(--red), var(--red-hot));
-      box-shadow: 0 0 10px var(--red-hot);
+      background: linear-gradient(90deg, var(--red-hot), var(--blue));
+      box-shadow: 0 0 10px var(--blue);
       transform: scaleX(0); transform-origin: left;
       pointer-events: none;
     }
@@ -693,7 +701,7 @@
       transform: perspective(1000px) rotateX(var(--ry)) rotateY(var(--rx));
       transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s ease, opacity 0.9s cubic-bezier(0.22,1,0.36,1), translate 0.9s cubic-bezier(0.22,1,0.36,1);
     }
-    .mv-feature:hover { box-shadow: 0 30px 70px -24px rgba(210,30,10,0.6); }
+    .mv-feature:hover { box-shadow: 0 30px 70px -24px rgba(47,123,255,0.65); }
     .mv-feature img, .mv-card img {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2;
       color: transparent; /* hide alt text if a thumbnail fails */
@@ -711,7 +719,7 @@
     /* red flash sweep on hover */
     .mv-feature::after, .mv-card::after {
       content: ''; position: absolute; inset: 0; z-index: -1;
-      background: linear-gradient(105deg, transparent 35%, rgba(255,42,20,0.35) 50%, transparent 65%);
+      background: linear-gradient(105deg, transparent 35%, rgba(47,123,255,0.4) 50%, transparent 65%);
       transform: translateX(-120%);
       transition: transform 0.8s cubic-bezier(0.22,1,0.36,1);
       mix-blend-mode: screen;
@@ -726,7 +734,7 @@
       background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.18);
       backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     }
-    .badge.hot { background: var(--red-hot); border-color: transparent; box-shadow: 0 0 16px rgba(255,42,20,0.6); }
+    .badge.hot { background: var(--blue); border-color: transparent; box-shadow: 0 0 16px rgba(47,123,255,0.7); }
 
     .mv-play {
       position: absolute; left: 50%; top: 46%;
@@ -756,8 +764,8 @@
     .mv-title {
       font-family: 'Horizon', sans-serif; font-size: clamp(1.5rem, 6vw, 2.4rem); line-height: 1;
       letter-spacing: 0.06em; text-transform: uppercase;
-      -webkit-text-stroke: 0.6px var(--red-hot);
-      text-shadow: -2px 0 rgba(255,30,50,0.5), 2px 0 rgba(0,200,255,0.35), 0 4px 20px rgba(0,0,0,0.6);
+      -webkit-text-stroke: 0.6px var(--cyan);
+      text-shadow: -2px 0 rgba(255,30,50,0.55), 2px 0 rgba(0,200,255,0.5), 0 4px 20px rgba(0,0,0,0.6);
     }
     .mv-card .mv-title { font-size: clamp(0.95rem, 3.6vw, 1.15rem); -webkit-text-stroke-width: 0.4px; }
     .mv-feature:hover .mv-title, .mv-card:hover .mv-title { animation: rgbSplit 0.5s steps(1) 1; }
@@ -833,28 +841,15 @@
       border: 1px solid var(--glass-border); border-radius: 16px;
       box-shadow: 0 10px 30px -14px var(--glass-shadow), inset 0 1px 0 var(--glass-hi);
     }
-    .tl-head, .tl-foot {
+    .tl-head {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 14px 18px;
+      padding: 14px 18px; border-bottom: 1px solid var(--line);
     }
-    .tl-head { border-bottom: 1px solid var(--line); }
-    .tl-foot { border-top: 1px solid var(--line); }
-    .tl-album {
-      font-family: 'Horizon', sans-serif; font-size: clamp(0.6rem, 1.8vw, 0.76rem);
-      letter-spacing: 0.08em; text-transform: uppercase; -webkit-text-stroke: 0.3px var(--red);
-    }
-    .tl-meta, .tl-foot {
+    .tl-meta {
       font-family: Arial, sans-serif; font-weight: 700; font-size: 0.55rem; letter-spacing: 0.2em;
       color: var(--muted); text-transform: uppercase; white-space: nowrap;
     }
-    .tl-meta b { color: var(--red-hot); }
-    .tl-foot a {
-      color: var(--text); text-decoration: none;
-      display: inline-flex; align-items: center; gap: 6px;
-      transition: color 0.2s ease;
-    }
-    .tl-foot a:hover { color: #1DB954; }
-    .tl-foot a svg { width: 10px; height: 10px; }
+    .tl-meta b { color: var(--cyan); }
 
     .tracks { list-style: none; }
     .track {
@@ -866,13 +861,13 @@
     .track:last-child { border-bottom: none; }
     .track::before {
       content: ''; position: absolute; inset: 0; z-index: -1;
-      background: linear-gradient(90deg, rgba(255,42,20,0.24), rgba(255,42,20,0) 78%);
+      background: linear-gradient(90deg, rgba(47,123,255,0.30), rgba(47,123,255,0) 78%);
       transform: scaleX(0); transform-origin: left;
       transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
     }
     .track::after {
       content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-      background: var(--red-hot); box-shadow: 0 0 12px var(--red-hot);
+      background: var(--cyan); box-shadow: 0 0 12px var(--cyan);
       transform: scaleY(0); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
     }
     .track:hover::before, .track:focus-within::before { transform: scaleX(1); }
@@ -880,10 +875,10 @@
     .t-num {
       flex-shrink: 0; width: 2.1em;
       font-family: 'Horizon', sans-serif; font-size: clamp(0.8rem, 2.4vw, 0.95rem);
-      color: transparent; -webkit-text-stroke: 1px var(--red-hot);
+      color: transparent; -webkit-text-stroke: 1px var(--cyan);
       transition: color 0.25s ease;
     }
-    .track:hover .t-num { color: var(--red-hot); }
+    .track:hover .t-num { color: var(--cyan); }
     .t-name {
       flex: 1; min-width: 0;
       font-family: 'Horizon', sans-serif; font-size: clamp(0.76rem, 2.5vw, 0.96rem);
@@ -891,9 +886,6 @@
       transition: translate 0.35s cubic-bezier(0.22,1,0.36,1);
     }
     .track:hover .t-name { translate: 6px 0; animation: rgbSplit 0.5s steps(1) 1; }
-    .t-link { color: var(--text); text-decoration: none; outline: none; }
-    .t-link::after { content: ''; position: absolute; inset: 0; } /* whole row opens the track */
-    .track:has(.t-link:focus-visible) { outline: 2px solid var(--red-hot); outline-offset: -2px; }
     .t-e {
       flex-shrink: 0; width: 15px; height: 15px; border-radius: 3px;
       display: flex; align-items: center; justify-content: center;
@@ -918,7 +910,7 @@
       color: var(--muted); font-variant-numeric: tabular-nums;
     }
     @media (max-width: 380px) {
-      .track, .tl-head, .tl-foot { padding-left: 13px; padding-right: 13px; }
+      .track, .tl-head { padding-left: 13px; padding-right: 13px; }
       .t-mv { padding: 6px; }
       .t-mv span { display: none; }
     }
@@ -927,9 +919,9 @@
 
     /* credits: produced / written / performed */
     .credits {
-      position: relative; overflow: hidden; isolation: isolate;
-      margin-top: 14px;
-      padding: clamp(20px, 5vw, 30px) clamp(18px, 4.5vw, 28px);
+      position: relative; isolation: isolate;
+      margin-top: 48px;
+      padding: 82px clamp(18px, 4.5vw, 28px) clamp(20px, 5vw, 30px);
       border-radius: 16px;
       background: linear-gradient(160deg, #141417, #060607);
       color: #f4f4f6;
@@ -937,23 +929,18 @@
       box-shadow: 0 24px 50px -24px rgba(0,0,0,0.75);
     }
     .credits::before {
-      content: ''; position: absolute; inset: 0; z-index: -1;
+      content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
       background:
         repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.28) 2px 3px),
-        radial-gradient(circle at 88% 12%, rgba(210,30,10,0.5), transparent 55%),
-        radial-gradient(circle at 0% 100%, rgba(120,6,20,0.45), transparent 50%);
+        radial-gradient(circle at 92% 8%, rgba(47,123,255,0.55), transparent 55%),
+        radial-gradient(circle at 0% 100%, rgba(210,30,10,0.40), transparent 50%);
     }
-    .cr-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-    .cr-kicker {
-      display: flex; align-items: center; gap: 10px; margin-top: 6px;
-      font-family: Arial, sans-serif; font-weight: 700; font-size: 0.58rem; letter-spacing: 0.3em;
-      color: rgba(255,255,255,0.6); text-transform: uppercase;
-    }
-    .cr-kicker::before { content: ''; width: 18px; height: 2px; background: var(--red-hot); box-shadow: 0 0 8px var(--red-hot); }
+    @media (min-width: 560px) { .credits { padding-top: 60px; } }
     .cr-stamp {
-      position: relative; flex-shrink: 0;
-      width: clamp(88px, 25vw, 124px); aspect-ratio: 1;
-      margin: -6px -6px -18px 0;
+      position: absolute; top: -34px; right: -8px; z-index: 2;
+      width: clamp(96px, 26vw, 118px); aspect-ratio: 1;
+      transform: rotate(-10deg);
+      filter: drop-shadow(0 12px 22px rgba(47,123,255,0.55));
     }
     .cr-stamp svg { width: 100%; height: 100%; animation: spin 16s linear infinite; }
     .cr-core {
@@ -962,10 +949,10 @@
     }
     .cr-core b {
       font-family: 'Horizon', sans-serif; font-weight: normal; font-size: clamp(0.8rem, 2.6vw, 1.05rem);
-      color: var(--red-hot); text-shadow: 0 0 14px rgba(255,42,20,0.7);
+      color: #fff; text-shadow: -1px 0 rgba(255,30,50,0.7), 1px 0 rgba(0,220,255,0.7);
     }
     .cr-core small { font-family: Arial, sans-serif; font-weight: 700; font-size: 0.42rem; letter-spacing: 0.24em; opacity: 0.7; }
-    .cr-list { list-style: none; margin-top: 8px; }
+    .cr-list { list-style: none; }
     .cr-list li {
       display: flex; align-items: center; gap: 0.45em;
       font-family: 'Horizon', sans-serif; font-size: clamp(1.3rem, 6.2vw, 2.25rem);
@@ -973,7 +960,7 @@
     }
     .cr-x {
       font-family: Arial, sans-serif; font-weight: 700; font-size: 0.55em; width: 1em;
-      color: var(--red-hot); text-shadow: 0 0 12px rgba(255,42,20,0.8);
+      color: var(--cyan); text-shadow: 0 0 12px rgba(25,211,255,0.8);
     }
     html.js .credits .cr-list li { clip-path: inset(0 100% 0 0); }
     html.js .credits.in .cr-list li { animation: wipeIn 0.75s cubic-bezier(0.77,0,0.18,1) calc(0.2s + var(--i) * 0.13s) both; }
@@ -988,11 +975,6 @@
       letter-spacing: 0.05em; color: var(--red-hot);
       text-shadow: -2px 0 rgba(255,30,50,0.6), 2px 0 rgba(0,200,255,0.45), 0 0 30px rgba(255,42,20,0.5);
       animation: jitter 5.5s steps(1) 3s infinite;
-    }
-    .cr-line {
-      margin-top: 10px;
-      font-family: Arial, sans-serif; font-weight: 700; font-size: 0.6rem; letter-spacing: 0.22em;
-      color: rgba(255,255,255,0.5); text-transform: uppercase;
     }
 
     @keyframes trackIn { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: none; } }
@@ -1010,22 +992,24 @@
     .lb-frame {
       position: relative; aspect-ratio: 16 / 9; width: 100%;
       border-radius: 14px; overflow: hidden; background: #000;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 30px 90px -20px rgba(210,30,10,0.55);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 30px 90px -20px rgba(47,123,255,0.6);
     }
     .lb-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
     .lb-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
-    .lb-title { font-family: 'Horizon', sans-serif; font-size: clamp(0.9rem, 3vw, 1.2rem); letter-spacing: 0.06em; -webkit-text-stroke: 0.4px var(--red-hot); }
+    .lb-title { font-family: 'Horizon', sans-serif; font-size: clamp(0.9rem, 3vw, 1.2rem); letter-spacing: 0.06em; -webkit-text-stroke: 0.4px var(--cyan); }
     .lb-actions { display: flex; gap: 8px; }
     .lb-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 9px 14px; border-radius: 30px; cursor: pointer;
+      width: 40px; height: 40px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 50%; cursor: pointer;
       font-family: Arial, sans-serif; font-weight: 700; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase;
       color: #fff; text-decoration: none;
       background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
       transition: background 0.25s ease, transform 0.25s ease;
     }
-    .lb-btn:hover { background: var(--red-hot); border-color: transparent; transform: translateY(-2px); }
-    .lb-btn svg { width: 12px; height: 12px; }
+    .lb-btn:hover { background: var(--blue); border-color: transparent; transform: translateY(-2px); }
+    #lb-yt:hover { background: #ff0000; }
+    .lb-btn svg { width: 15px; height: 15px; }
     html.lb-open { overflow: hidden; }
 
     /* ══════════ FOOTER ══════════ */
@@ -1041,21 +1025,24 @@
       color: transparent;
       background: linear-gradient(180deg, var(--text) 0%, transparent 92%);
       -webkit-background-clip: text; background-clip: text;
-      -webkit-text-stroke: 1px rgba(255,42,20,0.55);
+      -webkit-text-stroke: 1px rgba(47,123,255,0.75);
       opacity: 0.9;
     }
     :root:not(.dark) .mega { opacity: 0.75; }
     .to-top {
       margin-top: clamp(22px, 4vw, 32px);
-      display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px;
+      width: 42px; height: 42px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
       font-family: Arial, sans-serif; font-weight: 700; font-size: 0.6rem; letter-spacing: 0.2em;
       color: var(--text); text-decoration: none; text-transform: uppercase;
       transition: transform 0.28s cubic-bezier(0.22,1,0.36,1);
     }
     .to-top:hover { transform: translateY(-3px); }
-    .to-top svg { width: 11px; height: 11px; }
+    .to-top svg { width: 15px; height: 15px; }
     .site-footer .footer-line { animation: none; margin-top: 16px; }
 
+    @keyframes siren { from { opacity: 0.2; } to { opacity: 1; } }
+    @keyframes vhs { 0% { transform: translateY(-20vh); } 55%, 100% { transform: translateY(110vh); } }
     @keyframes barFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
     @keyframes eq { from { transform: scaleY(0.25); } to { transform: scaleY(1); } }
     @keyframes ring { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.7); opacity: 0; } }
@@ -1074,6 +1061,8 @@
       html.js .credits .cr-list li { clip-path: none; animation: none !important; }
       .cr-stamp svg, .cr-by strong { animation: none !important; }
       .piece, .piece img { animation: none !important; }
+      .siren { animation: none !important; opacity: 0.6; }
+      .vhs { display: none; }
       .piece { top: var(--y); transform: rotate(var(--r0)); }
     }
   </style>
@@ -1095,7 +1084,10 @@
     <div class="blob b1"></div>
     <div class="blob b2"></div>
     <div class="blob b3"></div>
+    <div class="siren s-red"></div>
+    <div class="siren s-blue"></div>
     <canvas class="embers" id="embers"></canvas>
+    <div class="vhs"></div>
     <div class="vignette"></div>
     <div class="scanlines"></div>
     <div class="grain"></div>
@@ -1103,8 +1095,6 @@
 
   <div class="fall" id="fall" aria-hidden="true"></div>
 
-  <div class="rail left" aria-hidden="true">KIDS HAVE DARK THOUGHTS</div>
-  <div class="rail right" aria-hidden="true">MUMAFI <b>✦</b> 2026</div>
 
   <div class="top-bar">
     <div class="lang-toggle glass-pill en" id="lang-toggle" role="group" aria-label="Language">
@@ -1116,10 +1106,9 @@
     <button class="icon-btn glass-pill" id="share-btn" onclick="sharePage()" aria-label="Share">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/></svg>
     </button>
-    <button class="theme-toggle glass-pill" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <button class="icon-btn theme-btn glass-pill" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle dark mode">
       <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 14.3A8.5 8.5 0 0 1 9.7 3a.6.6 0 0 0-.8-.7A10 10 0 1 0 21.7 15.1a.6.6 0 0 0-.7-.8z"/></svg>
       <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>
-      <span id="theme-icon">LIGHT</span>
     </button>
     </div>
   </div>
@@ -1152,7 +1141,7 @@
           </svg>
         </div>
         <div class="link-text">
-          <span class="link-label"><span class="link-idx">01</span><span data-de="STREAMEN AUF" data-en="STREAM ON" data-scramble="1.1">STREAM ON</span></span>
+          <span class="link-label"><span class="link-idx">01</span></span>
           <span class="link-title">Spotify</span>
         </div>
         <span class="link-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -1168,7 +1157,7 @@
           </svg>
         </div>
         <div class="link-text">
-          <span class="link-label"><span class="link-idx">02</span><span data-de="STREAMEN AUF" data-en="STREAM ON" data-scramble="1.2">STREAM ON</span></span>
+          <span class="link-label"><span class="link-idx">02</span></span>
           <span class="link-title">Apple Music</span>
         </div>
         <span class="link-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -1190,7 +1179,7 @@
           </svg>
         </div>
         <div class="link-text">
-          <span class="link-label"><span class="link-idx">03</span><span data-de="STREAMEN AUF" data-en="STREAM ON" data-scramble="1.3">STREAM ON</span></span>
+          <span class="link-label"><span class="link-idx">03</span></span>
           <span class="link-title">Deezer</span>
         </div>
         <span class="link-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -1206,7 +1195,7 @@
           </svg>
         </div>
         <div class="link-text">
-          <span class="link-label"><span class="link-idx">04</span><span data-de="ANSEHEN AUF" data-en="WATCH ON" data-scramble="1.4">WATCH ON</span></span>
+          <span class="link-label"><span class="link-idx">04</span></span>
           <span class="link-title">YouTube</span>
         </div>
         <span class="link-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -1223,7 +1212,7 @@
           </svg>
         </div>
         <div class="link-text">
-          <span class="link-label"><span class="link-idx">05</span><span data-de="STREAMEN AUF" data-en="STREAM ON" data-scramble="1.5">STREAM ON</span></span>
+          <span class="link-label"><span class="link-idx">05</span></span>
           <span class="link-title">YouTube Music</span>
         </div>
         <span class="link-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -1242,7 +1231,7 @@
           </svg>
         </div>
         <div class="link-text">
-          <span class="link-label"><span class="link-idx">06</span><span data-de="HÖREN AUF" data-en="LISTEN ON" data-scramble="1.6">LISTEN ON</span></span>
+          <span class="link-label"><span class="link-idx">06</span></span>
           <span class="link-title">SoundCloud</span>
         </div>
         <span class="link-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -1260,13 +1249,11 @@
          data-yt="epoNoKmvtGk" data-title="KING">
         <img src="https://i.ytimg.com/vi/epoNoKmvtGk/maxresdefault.jpg" alt="MuMaFi – King (Official Music Video)" loading="lazy" decoding="async">
         <span class="mv-badges">
-          <span class="badge hot" data-de="NEUESTES" data-en="LATEST">LATEST</span>
-          <span class="badge">TRACK 04</span>
+          <span class="badge hot" data-de="NEU" data-en="NEW">NEW</span>
         </span>
         <span class="mv-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg></span>
         <span class="mv-info">
           <span class="mv-title">KING</span>
-          <span class="mv-sub"><span data-de="OFFIZIELLES MUSIKVIDEO" data-en="OFFICIAL MUSIC VIDEO">OFFICIAL MUSIC VIDEO</span> · 14.06.2026</span>
         </span>
       </a>
 
@@ -1278,17 +1265,17 @@
           <a class="mv-card" href="https://youtu.be/nEUZkA9WRH4" target="_blank" rel="noopener" data-yt="nEUZkA9WRH4" data-title="SPIRIT">
             <img src="https://i.ytimg.com/vi/nEUZkA9WRH4/sddefault.jpg" alt="MuMaFi – Spirit (Official Music Video)" loading="lazy" decoding="async">
             <span class="mv-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg></span>
-            <span class="mv-info"><span class="mv-title">SPIRIT</span><span class="mv-sub">TRACK 11 · 06.06.2026</span></span>
+            <span class="mv-info"><span class="mv-title">SPIRIT</span></span>
           </a>
           <a class="mv-card" href="https://youtu.be/w3-5R4C4Wn4" target="_blank" rel="noopener" data-yt="w3-5R4C4Wn4" data-title="DEATH">
             <img src="https://i.ytimg.com/vi/w3-5R4C4Wn4/sddefault.jpg" alt="MuMaFi – Death (Official Music Video)" loading="lazy" decoding="async">
             <span class="mv-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg></span>
-            <span class="mv-info"><span class="mv-title">DEATH</span><span class="mv-sub">TRACK 09 · 04.06.2026</span></span>
+            <span class="mv-info"><span class="mv-title">DEATH</span></span>
           </a>
           <a class="mv-card" href="https://youtu.be/SQu_spLt_dA" target="_blank" rel="noopener" data-yt="SQu_spLt_dA" data-title="CEO">
             <img src="https://i.ytimg.com/vi/SQu_spLt_dA/sddefault.jpg" alt="MuMaFi – CEO (Official Music Video)" loading="lazy" decoding="async">
             <span class="mv-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg></span>
-            <span class="mv-info"><span class="mv-title">CEO</span><span class="mv-sub">TRACK 12 · 16.05.2026</span></span>
+            <span class="mv-info"><span class="mv-title">CEO</span></span>
           </a>
         </div>
         <button class="mv-nav next glass-pill" type="button" aria-label="Next">
@@ -1301,8 +1288,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
         </span>
         <span class="yt-cta-text">
-          <span class="yt-cta-main" data-de="KANAL ABONNIEREN" data-en="SUBSCRIBE ON YOUTUBE">SUBSCRIBE ON YOUTUBE</span>
-          <span class="yt-cta-sub">@MUMAFI-MUSIC</span>
+          <span class="yt-cta-main" data-de="ABONNIEREN" data-en="SUBSCRIBE">SUBSCRIBE</span>
         </span>
         <span class="link-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </a>
@@ -1316,126 +1302,118 @@
 
       <div class="tl-panel reveal">
         <div class="tl-head">
-          <span class="tl-album">Kids Have Dark Thoughts</span>
-          <span class="tl-meta"><b>13</b> TRACKS · 36:21</span>
+          <span class="tl-meta"><b>13</b> TRACKS</span>
+          <span class="tl-meta">36:21</span>
         </div>
         <ol class="tracks">
           <li class="track" style="--i:0">
             <span class="t-num">01</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/6WcyYDBWj7uHi3ZDl0aECh" target="_blank" rel="noopener">0 KMH</a></span>
+            <span class="t-name">0 KMH</span>
             <span class="t-dur">0:58</span>
           </li>
           <li class="track" style="--i:1">
             <span class="t-num">02</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/3kF9JEf8DOQdizWyCooduk" target="_blank" rel="noopener">200 KMH</a></span>
+            <span class="t-name">200 KMH</span>
             <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
             <span class="t-dur">2:46</span>
           </li>
           <li class="track" style="--i:2">
             <span class="t-num">03</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/2sIL8zuyl0ehlJzBVn6lnv" target="_blank" rel="noopener">ONE BY ONE</a></span>
+            <span class="t-name">ONE BY ONE</span>
             <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
             <span class="t-dur">2:53</span>
           </li>
           <li class="track" style="--i:3">
             <span class="t-num">04</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/28kekMT1gvD1a8TlAvL5vM" target="_blank" rel="noopener">KING</a></span>
+            <span class="t-name">KING</span>
             <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
             <a class="t-mv" href="https://youtu.be/epoNoKmvtGk" target="_blank" rel="noopener" data-yt="epoNoKmvtGk" data-title="KING" aria-label="KING – Music video"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg><span>VIDEO</span></a>
             <span class="t-dur">2:36</span>
           </li>
           <li class="track" style="--i:4">
             <span class="t-num">05</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/42V8UaV8CM477E5kQQio7l" target="_blank" rel="noopener">PASSIERT</a></span>
+            <span class="t-name">PASSIERT</span>
             <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
             <span class="t-dur">3:06</span>
           </li>
           <li class="track" style="--i:5">
             <span class="t-num">06</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/4k1i5x9ZGiHfvO75IiElI5" target="_blank" rel="noopener">TALENT IN ME</a></span>
+            <span class="t-name">TALENT IN ME</span>
             <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
             <span class="t-dur">3:00</span>
           </li>
           <li class="track" style="--i:6">
             <span class="t-num">07</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/0lLENYZx2AKWOOwIGWZ8ca" target="_blank" rel="noopener">SING ALONG</a></span>
+            <span class="t-name">SING ALONG</span>
             <span class="t-dur">3:33</span>
           </li>
           <li class="track" style="--i:7">
             <span class="t-num">08</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/41shvDIxE1j16Uge2WbrSJ" target="_blank" rel="noopener">CRAZY</a></span>
+            <span class="t-name">CRAZY</span>
             <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
             <span class="t-dur">3:23</span>
           </li>
           <li class="track" style="--i:8">
             <span class="t-num">09</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/6RX5tCd9A4U7V1odkkTV4C" target="_blank" rel="noopener">DEATH</a></span>
+            <span class="t-name">DEATH</span>
             <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
             <a class="t-mv" href="https://youtu.be/w3-5R4C4Wn4" target="_blank" rel="noopener" data-yt="w3-5R4C4Wn4" data-title="DEATH" aria-label="DEATH – Music video"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg><span>VIDEO</span></a>
             <span class="t-dur">2:44</span>
           </li>
           <li class="track" style="--i:9">
             <span class="t-num">10</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/3K0oh0jRb3SQ5bVDKvbDbG" target="_blank" rel="noopener">VIBE</a></span>
+            <span class="t-name">VIBE</span>
             <span class="t-dur">3:02</span>
           </li>
           <li class="track" style="--i:10">
             <span class="t-num">11</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/4XUsfL1g3IZpynd7AvbP2A" target="_blank" rel="noopener">SPIRIT</a></span>
+            <span class="t-name">SPIRIT</span>
             <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
             <a class="t-mv" href="https://youtu.be/nEUZkA9WRH4" target="_blank" rel="noopener" data-yt="nEUZkA9WRH4" data-title="SPIRIT" aria-label="SPIRIT – Music video"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg><span>VIDEO</span></a>
             <span class="t-dur">2:44</span>
           </li>
           <li class="track" style="--i:11">
             <span class="t-num">12</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/6PCPwqhSAh98O11mn34mOS" target="_blank" rel="noopener">CEO</a></span>
+            <span class="t-name">CEO</span>
             <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
             <a class="t-mv" href="https://youtu.be/SQu_spLt_dA" target="_blank" rel="noopener" data-yt="SQu_spLt_dA" data-title="CEO" aria-label="CEO – Music video"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4.5v15a1 1 0 001.5.86l12.5-7.5a1 1 0 000-1.72L7.5 3.64A1 1 0 006 4.5z"/></svg><span>VIDEO</span></a>
             <span class="t-dur">2:54</span>
           </li>
           <li class="track" style="--i:12">
             <span class="t-num">13</span>
-            <span class="t-name"><a class="t-link" href="https://open.spotify.com/track/06ShsdxAh77hwxhW8ROxVG" target="_blank" rel="noopener">DRUG-STORY</a></span>
+            <span class="t-name">DRUG-STORY</span>
             <span class="t-e" title="Explicit" aria-label="Explicit">E</span>
             <span class="t-dur">2:42</span>
           </li>
         </ol>
-        <div class="tl-foot">
-          <span>℗ 2026 MUMAFI</span>
-          <a href="https://open.spotify.com/album/3zCmlFlw9Bda4tv4WcCGLc" target="_blank" rel="noopener"><span data-de="ALBUM AUF SPOTIFY" data-en="FULL ALBUM ON SPOTIFY">FULL ALBUM ON SPOTIFY</span> <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M9 7h8v8"/></svg></a>
-        </div>
       </div>
 
       <div class="credits reveal">
-        <div class="cr-top">
-          <p class="cr-kicker" data-de="ALLE 13 TRACKS" data-en="ALL 13 TRACKS">ALL 13 TRACKS</p>
           <div class="cr-stamp" aria-hidden="true">
             <svg viewBox="0 0 200 200">
               <defs><path id="cr-circle" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs>
-              <circle cx="100" cy="100" r="97" fill="none" stroke="rgba(255,42,20,0.65)" stroke-width="1.5"/>
-              <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,42,20,0.4)" stroke-width="1"/>
+              <circle cx="100" cy="100" r="99" fill="#2f7bff"/>
+              <circle cx="100" cy="100" r="93" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.2"/>
+              <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
               <text font-family="Arial, sans-serif" font-weight="700" font-size="14" letter-spacing="2" fill="#f4f4f6">
                 <textPath href="#cr-circle" textLength="488" lengthAdjust="spacing" data-de="PRODUZIERT ✦ GESCHRIEBEN ✦ PERFORMT ✦ " data-en="PRODUCED ✦ WRITTEN ✦ PERFORMED ✦ ">PRODUCED ✦ WRITTEN ✦ PERFORMED ✦ </textPath>
               </text>
             </svg>
             <span class="cr-core"><b>100%</b><small>MUMAFI</small></span>
           </div>
-        </div>
         <ul class="cr-list">
           <li style="--i:0"><span class="cr-x" aria-hidden="true">✕</span><span data-de="PRODUZIERT" data-en="PRODUCED">PRODUCED</span></li>
           <li style="--i:1"><span class="cr-x" aria-hidden="true">✕</span><span data-de="GESCHRIEBEN" data-en="WRITTEN">WRITTEN</span></li>
           <li style="--i:2"><span class="cr-x" aria-hidden="true">✕</span><span data-de="PERFORMT" data-en="PERFORMED">PERFORMED</span></li>
         </ul>
         <p class="cr-by"><span data-de="KOMPLETT VON" data-en="ALL BY">ALL BY</span> <strong>MUMAFI</strong></p>
-        <p class="cr-line" data-de="Jeder Beat. Jede Zeile. Jede Stimme." data-en="Every beat. Every bar. Every vocal.">Every beat. Every bar. Every vocal.</p>
       </div>
     </section>
 
     <footer class="site-footer reveal">
       <div class="mega" aria-hidden="true">MUMAFI</div>
-      <a class="to-top glass-pill" href="#top">
+      <a class="to-top glass-pill" href="#top" aria-label="Back to top">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M6 11l6-6 6 6"/></svg>
-        <span data-de="NACH OBEN" data-en="BACK TO TOP">BACK TO TOP</span>
       </a>
       <p class="footer-line" data-de="© 2026 MUMAFI" data-en="© 2026 MUMAFI">© 2026 MUMAFI</p>
     </footer>
@@ -1447,11 +1425,11 @@
     <div class="lb-bar">
       <span class="lb-title" id="lb-title">KING</span>
       <div class="lb-actions">
-        <a class="lb-btn" id="lb-yt" href="https://youtu.be/epoNoKmvtGk" target="_blank" rel="noopener">
-          YouTube <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M9 7h8v8"/></svg>
+        <a class="lb-btn" id="lb-yt" href="https://youtu.be/epoNoKmvtGk" target="_blank" rel="noopener" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
         </a>
-        <button class="lb-btn" id="lb-close" type="button">
-          <span data-de="SCHLIESSEN" data-en="CLOSE">CLOSE</span> <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+        <button class="lb-btn" id="lb-close" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
     </div>
@@ -1497,16 +1475,11 @@
       })(start);
     }
 
-    function themeLabel() {
+    function updateThemeUI() {
       const isDark = root.classList.contains('dark');
-      return isDark
-        ? (currentLang === 'de' ? 'HELL' : 'LIGHT')
-        : (currentLang === 'de' ? 'DUNKEL' : 'DARK');
-    }
-
-    function updateThemeUI(animate) {
-      const label = document.getElementById('theme-icon');
-      animate ? scramble(label, themeLabel(), 350) : (label.textContent = themeLabel());
+      document.getElementById('theme-toggle-btn').setAttribute('aria-label', isDark
+        ? (currentLang === 'de' ? 'Heller Modus' : 'Light mode')
+        : (currentLang === 'de' ? 'Dunkler Modus' : 'Dark mode'));
       document.querySelector('meta[name="theme-color"]')
         .setAttribute('content', root.classList.contains('dark') ? '#050506' : '#f3f1ee');
     }
@@ -1787,7 +1760,8 @@
         return {
           x: Math.random() * w, y: anywhere ? Math.random() * h : h + 10,
           r: 0.6 + Math.random() * 1.8, vy: 0.25 + Math.random() * 0.7,
-          vx: (Math.random() - 0.5) * 0.3, ph: Math.random() * 6.283, a: 0.25 + Math.random() * 0.6
+          vx: (Math.random() - 0.5) * 0.3, ph: Math.random() * 6.283, a: 0.25 + Math.random() * 0.6,
+          blue: Math.random() < 0.45
         };
       }
       function resize() {
@@ -1812,13 +1786,13 @@
           const alpha = p.a * (0.6 + 0.4 * Math.sin(p.ph * 3)) * (dark ? 1 : 0.55);
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.r * 2.8, 0, 6.283);
-          ctx.fillStyle = 'rgba(255,70,30,' + (alpha * 0.16).toFixed(3) + ')';
+          ctx.fillStyle = (p.blue ? 'rgba(40,120,255,' : 'rgba(255,70,30,') + (alpha * 0.16).toFixed(3) + ')';
           ctx.fill();
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.r, 0, 6.283);
-          ctx.fillStyle = dark
-            ? 'rgba(255,' + (110 + (p.r * 30 | 0)) + ',60,' + alpha.toFixed(3) + ')'
-            : 'rgba(192,32,10,' + alpha.toFixed(3) + ')';
+          ctx.fillStyle = p.blue
+            ? (dark ? 'rgba(110,180,255,' : 'rgba(30,90,220,') + alpha.toFixed(3) + ')'
+            : (dark ? 'rgba(255,' + (110 + (p.r * 30 | 0)) + ',60,' : 'rgba(192,32,10,') + alpha.toFixed(3) + ')';
           ctx.fill();
         }
         raf = requestAnimationFrame(frame);
