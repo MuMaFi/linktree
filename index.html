@@ -1140,9 +1140,9 @@
     :root:not(.dark) .cr-by strong { text-shadow: none; animation: none; }
     :root:not(.dark) .cr-x { text-shadow: none; }
     :root:not(.dark) .cr-stamp { filter: drop-shadow(0 10px 18px rgba(47,123,255,0.3)); }
-    /* footer wordmark: hairline outline only */
-    :root:not(.dark) .mega .ch { background: none; }
-    :root:not(.dark) .mega { opacity: 1; -webkit-text-stroke: 1px rgba(47,123,255,0.45); }
+    /* footer wordmark: solid ink, like the title */
+    :root:not(.dark) .mega { opacity: 1; -webkit-text-stroke: 0; }
+    :root:not(.dark) .mega .ch { background: none; color: var(--text); }
     :root:not(.dark) .piece img { filter: none; }
     /* cyan is too pale on white – use the deeper blue for accents */
     :root:not(.dark) .t-num { -webkit-text-stroke-color: var(--blue); }
